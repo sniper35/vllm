@@ -386,6 +386,7 @@ _MULTIMODAL_MODELS = {
     "MolmoForCausalLM": ("molmo", "MolmoForCausalLM"),
     "Moondream3ForCausalLM": ("moondream3", "Moondream3ForCausalLM"),
     "HfMoondream": ("moondream3", "Moondream3ForCausalLM"),
+    "Molmo2ForConditionalGeneration": ("molmo2", "Molmo2ForConditionalGeneration"),
     "NVLM_D": ("nvlm_d", "NVLM_D_Model"),
     "Ovis": ("ovis", "Ovis"),
     "Ovis2_5": ("ovis2_5", "Ovis2_5"),
