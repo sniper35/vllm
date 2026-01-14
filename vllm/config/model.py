@@ -1127,6 +1127,7 @@ class ModelConfig:
         MM_PREFIX_LM_MODELS = (
             "gemma3",
             "paligemma",
+            "moondream3",
         )
         if not hasattr(self.hf_config, "model_type"):
             return False
