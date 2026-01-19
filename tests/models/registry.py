@@ -824,6 +824,7 @@ _MULTIMODAL_EXAMPLE_MODELS = {
     ),
     "Moondream3ForCausalLM": _HfExamplesInfo(
         "moondream/moondream3-preview",
+        tokenizer="moondream/starmie-v1",
         trust_remote_code=True,
     ),
     "Molmo2ForConditionalGeneration": _HfExamplesInfo(
