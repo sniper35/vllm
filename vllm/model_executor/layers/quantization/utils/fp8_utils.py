@@ -1231,6 +1231,8 @@ def create_fp8_scale_parameter(
 
     if dtype == torch.float32:
         scale[:] = torch.finfo(torch.float32).min
+    elif dtype == getattr(torch, "float8_e8m0fnu", None):
+        scale[:] = 0
     set_weight_attrs(scale, {"scale_type": "weight_scale"})
     return scale
 
