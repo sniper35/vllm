@@ -120,6 +120,10 @@ class BlockTables:
             self.num_blocks.np[i, req_index] = start + len(block_ids)
 
     def apply_staged_writes(self) -> None:
+        if self.num_kv_cache_groups == 0:
+            # Attention-free models (e.g. Parakeet TDT) have no block tables
+            # to flush; num_blocks is a (0, N) tensor with nothing to copy.
+            return
         if self.num_kv_cache_groups == 1:
             # Single group: write directly, skipping the per-write group lookup.
             self.block_tables[0].apply_write()
