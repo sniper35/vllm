@@ -12,6 +12,7 @@ from typing import Any
 
 import torch
 
+import vllm.envs as envs
 from vllm.model_executor.warmup.jit_warmup import (
     WarmupChoices,
     WarmupIntRange,
@@ -1678,8 +1679,14 @@ def apply_top_k_top_p_triton(
     # path is already fast). The monolithic's standalone top-p branch then
     # covers only rows whose top-k is a no-op (k < vocab but <= k finite
     # logits, e.g. grammar masks), which the split pipeline skips.
+    # The split pipeline and the monolithic kernel's top-p search can keep
+    # different token sets for the same row, so under VLLM_BATCH_INVARIANT the
+    # choice must not depend on how many rows share the batch.
     use_split = (
-        topp_enabled and batch_size <= _SPLIT_MAX_BATCH and logits.device.type == "cuda"
+        topp_enabled
+        and batch_size <= _SPLIT_MAX_BATCH
+        and logits.device.type == "cuda"
+        and not envs.VLLM_BATCH_INVARIANT
     )
     if use_split and not topk_enabled:
         _apply_topp_split(logits, None, p_ptr, mask_value, num_sm)

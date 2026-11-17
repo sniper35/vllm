@@ -765,6 +765,30 @@ class TestTritonTopkTopp:
         )
         assert torch.equal(actual, expected)
 
+    def test_topp_batch_invariant_across_split_boundary(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
+        """Under VLLM_BATCH_INVARIANT a top-p-only row's mask must not depend on
+        the batch size.
+
+        Regression: batches of at most _SPLIT_MAX_BATCH rows took the split
+        top-p pipeline and larger ones the monolithic kernel's top-p search,
+        which keep different token sets for the same row.
+        """
+        import vllm.envs as envs
+        import vllm.v1.sample.ops.topk_topp_triton as tt
+
+        monkeypatch.setattr(envs, "VLLM_BATCH_INVARIANT", True)
+        batch_size, vocab_size = tt._SPLIT_MAX_BATCH + 1, 32000
+        logits = 2.0 * torch.randn(
+            batch_size, vocab_size, generator=self.generator, dtype=torch.float32
+        )
+        p = torch.full((batch_size,), 0.9, dtype=torch.float32)
+
+        alone = tt.apply_top_k_top_p_triton(logits[:8].clone(), None, p[:8])
+        batched = tt.apply_top_k_top_p_triton(logits.clone(), None, p)
+        assert torch.equal(alone.isfinite(), batched[:8].isfinite())
+
     def test_topp_tie_break_deterministic(self):
         """Boundary-duplicate trimming must be deterministic across calls.
 
